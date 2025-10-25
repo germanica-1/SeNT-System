@@ -73,7 +73,7 @@ export default function LoginForm() {
         <div className="text-center mb-8">
           <div className="flex justify-center mb-4">
             <img
-              src="/logo.jpg"
+              src="/logo.png"
               alt="School Logo"
               className="h-24 w-24 object-contain rounded-lg"
             />

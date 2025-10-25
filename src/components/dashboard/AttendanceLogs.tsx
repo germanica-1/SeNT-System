@@ -348,9 +348,13 @@ const AttendanceLogs = ({ isVisible = true }: AttendanceLogsProps) => {
             <div 
               className="relative cursor-pointer"
               onClick={() => {
-                const dateInput = document.getElementById('attendance-date-filter');
+                const dateInput = document.getElementById('attendance-date-filter') as HTMLInputElement | null;
                 if (dateInput) {
-                  dateInput.showPicker?.() || dateInput.focus();
+                  if (typeof dateInput.showPicker === 'function') {
+                    dateInput.showPicker();
+                  } else {
+                    dateInput.focus();
+                  }
                 }
               }}
             >

@@ -40,7 +40,7 @@ const Sidebar = ({
         <div className="p-6 pt-5">
           <div className="flex items-center gap-3 mb-4">
             <img
-              src="/logo.jpg"
+              src="/logo.png"
               alt="School Logo"
               className="h-16 w-16 object-contain rounded-lg"
             />
@@ -84,7 +84,7 @@ const Sidebar = ({
         <div className="p-4 pt-6">
           <div className="flex items-center gap-3 mb-4">
             <img
-              src="/logo.jpg"
+              src="/logo.png"
               alt="School Logo"
               className="h-16 w-16 object-contain rounded-lg"
             />
