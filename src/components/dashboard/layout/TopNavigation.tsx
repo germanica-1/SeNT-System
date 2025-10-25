@@ -86,7 +86,7 @@ const TopNavigation = ({
         {/* Logo/Title for mobile */}
         <div className="lg:hidden flex items-center gap-3">
           <img
-            src="/logo.jpg"
+            src="/logo.png"
             alt="School Logo"
             className="h-16 w-16 object-contain rounded"
           />

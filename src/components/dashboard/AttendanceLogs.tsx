@@ -271,17 +271,17 @@ const AttendanceLogs = ({ isVisible = true }: AttendanceLogsProps) => {
             Track and monitor student attendance records
           </p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
           <Button
             onClick={exportToExcel}
-            className="bg-green-500 hover:bg-green-600 text-white"
+            className="bg-green-500 hover:bg-green-600 text-white w-full sm:w-auto"
           >
             <Download className="mr-2 h-4 w-4" />
             Export to Excel
           </Button>
           <Button
             onClick={exportToPDF}
-            className="bg-red-500 hover:bg-red-600 text-white"
+            className="bg-red-500 hover:bg-red-600 text-white w-full sm:w-auto"
           >
             <FileText className="mr-2 h-4 w-4" />
             Export to PDF
@@ -343,18 +343,14 @@ const AttendanceLogs = ({ isVisible = true }: AttendanceLogsProps) => {
             className="pl-9"
           />
         </div>
-        <div className="flex gap-2 sm:gap-4">
-          <div className="flex-shrink-0 relative">
+        <div className="flex flex-col sm:flex-row gap-2 sm:gap-4">
+          <div className="flex-shrink-0 relative w-full sm:w-auto">
             <div 
               className="relative cursor-pointer"
               onClick={() => {
-                const dateInput = document.getElementById('attendance-date-filter') as HTMLInputElement | null;
+                const dateInput = document.getElementById('attendance-date-filter');
                 if (dateInput) {
-                  if (typeof dateInput.showPicker === 'function') {
-                    dateInput.showPicker();
-                  } else {
-                    dateInput.focus();
-                  }
+                  dateInput.showPicker?.() || dateInput.focus();
                 }
               }}
             >
@@ -363,14 +359,14 @@ const AttendanceLogs = ({ isVisible = true }: AttendanceLogsProps) => {
                 type="date"
                 value={dateFilter}
                 onChange={(e) => setDateFilter(e.target.value)}
-                className="w-40 cursor-pointer [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:right-0 [&::-webkit-calendar-picker-indicator]:w-full [&::-webkit-calendar-picker-indicator]:h-full [&::-webkit-calendar-picker-indicator]:cursor-pointer"
+                className="w-full sm:w-40 cursor-pointer [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:right-0 [&::-webkit-calendar-picker-indicator]:w-full [&::-webkit-calendar-picker-indicator]:h-full [&::-webkit-calendar-picker-indicator]:cursor-pointer"
                 placeholder="Select date"
               />
               <Calendar className="absolute right-3 top-2.5 h-4 w-4 text-gray-600 dark:text-gray-300 pointer-events-none" />
             </div>
           </div>
           <Select value={gradeFilter} onValueChange={setGradeFilter}>
-            <SelectTrigger className="w-32 sm:w-40 flex-shrink-0">
+            <SelectTrigger className="w-full sm:w-40 flex-shrink-0">
               <SelectValue placeholder="Grade" />
             </SelectTrigger>
             <SelectContent>
@@ -384,7 +380,7 @@ const AttendanceLogs = ({ isVisible = true }: AttendanceLogsProps) => {
             </SelectContent>
           </Select>
           <Select value={sectionFilter} onValueChange={setSectionFilter}>
-            <SelectTrigger className="w-32 sm:w-40 flex-shrink-0">
+            <SelectTrigger className="w-full sm:w-40 flex-shrink-0">
               <SelectValue placeholder="Section" />
             </SelectTrigger>
             <SelectContent>
