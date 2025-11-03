@@ -67,33 +67,43 @@ const AttendanceLogs = ({ isVisible = true }: AttendanceLogsProps) => {
 
       let query = supabase
         .from("attendance_logs")
-        .select("*")
-        .order("date", { ascending: false })
-        .order("time", { ascending: false });
+        .select("*");
 
-      // Filter by date range based on active tab
-      const today = new Date();
-      if (activeTab === "daily") {
-        const todayStr = format(today, "yyyy-MM-dd");
-        query = query.eq("date", todayStr);
-      } else if (activeTab === "weekly") {
-        const weekAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
-        query = query.gte("date", format(weekAgo, "yyyy-MM-dd"));
-      } else if (activeTab === "monthly") {
-        const monthAgo = new Date(today.getTime() - 30 * 24 * 60 * 60 * 1000);
-        query = query.gte("date", format(monthAgo, "yyyy-MM-dd"));
-      }
-
-      // Apply specific date filter if set
+      // If a specific date filter is set, use it regardless of the tab
       if (dateFilter) {
         query = query.eq("date", dateFilter);
+      } else {
+        // Otherwise, filter by date range based on active tab
+        const today = new Date();
+        if (activeTab === "daily") {
+          const todayStr = format(today, "yyyy-MM-dd");
+          query = query.eq("date", todayStr);
+        } else if (activeTab === "weekly") {
+          const weekAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
+          query = query.gte("date", format(weekAgo, "yyyy-MM-dd"));
+        } else if (activeTab === "monthly") {
+          const monthAgo = new Date(today.getTime() - 30 * 24 * 60 * 60 * 1000);
+          query = query.gte("date", format(monthAgo, "yyyy-MM-dd"));
+        }
       }
 
       const { data, error } = await query;
 
       if (error) throw error;
 
-      setAttendanceLogs(data || []);
+      // Sort by date and time in descending order (most recent first)
+      const sortedData = (data || []).sort((a, b) => {
+        // Combine date and time into a comparable format
+        const dateTimeA = `${a.date} ${a.time}`;
+        const dateTimeB = `${b.date} ${b.time}`;
+        
+        // Compare as strings (works because of ISO date format YYYY-MM-DD and time format HH:MM:SS)
+        if (dateTimeB > dateTimeA) return 1;
+        if (dateTimeB < dateTimeA) return -1;
+        return 0;
+      });
+
+      setAttendanceLogs(sortedData);
     } catch (error) {
       console.error("Error fetching attendance logs:", error);
       toast({
