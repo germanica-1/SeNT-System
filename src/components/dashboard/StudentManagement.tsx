@@ -738,7 +738,7 @@ const StudentManagement = ({ isVisible = true }: StudentManagementProps) => {
 
   return (
     <div className="bg-white dark:bg-gray-800/50 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700/50 p-4 sm:p-6">
-      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6 gap-4">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-6 gap-4">
         <div>
           <h2 className="text-xl sm:text-2xl font-semibold text-gray-900 dark:text-gray-100">
             Student Management
@@ -747,7 +747,7 @@ const StudentManagement = ({ isVisible = true }: StudentManagementProps) => {
             Manage student profiles and information
           </p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           <Dialog
             open={isAddDialogOpen}
             onOpenChange={(open) => {
@@ -789,7 +789,7 @@ const StudentManagement = ({ isVisible = true }: StudentManagementProps) => {
             }}
           >
             <DialogTrigger asChild>
-              <Button className="bg-blue-500 hover:bg-blue-600 text-white">
+              <Button className="bg-blue-500 hover:bg-blue-600 text-white whitespace-nowrap">
                 <Plus className="mr-2 h-4 w-4" />
                 Add Student
               </Button>
@@ -1005,15 +1005,16 @@ const StudentManagement = ({ isVisible = true }: StudentManagementProps) => {
           <Button
             onClick={handleProcessEmbeddings}
             disabled={isProcessingEmbeddings || students.length === 0}
-            className="bg-green-500 hover:bg-green-600 text-white disabled:bg-gray-400"
+            className="bg-green-500 hover:bg-green-600 text-white disabled:bg-gray-400 whitespace-nowrap"
           >
             <CreditCard className="mr-2 h-4 w-4" />
-            {isProcessingEmbeddings ? "Processing..." : "Process Images"}
+            <span className="hidden sm:inline">{isProcessingEmbeddings ? "Processing..." : "Process Images"}</span>
+            <span className="sm:hidden">{isProcessingEmbeddings ? "Processing..." : "Process"}</span>
           </Button>
           <Button
             onClick={handleSync}
             disabled={isSyncing}
-            className="bg-purple-500 hover:bg-purple-600 text-white disabled:bg-gray-400"
+            className="bg-purple-500 hover:bg-purple-600 text-white disabled:bg-gray-400 whitespace-nowrap"
           >
             <RefreshCw
               className={`mr-2 h-4 w-4 ${isSyncing ? "animate-spin" : ""}`}
