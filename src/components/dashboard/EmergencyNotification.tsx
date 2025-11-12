@@ -75,7 +75,7 @@ const EmergencyNotification = ({
     [],
   );
   const [loading, setLoading] = useState(false);
-
+  const [parentCount, setParentCount] = useState(0);
   const [emailCount, setEmailCount] = useState(0);
   const [hasInitialized, setHasInitialized] = useState(false);
   const { toast } = useToast();
@@ -231,41 +231,75 @@ const EmergencyNotification = ({
     try {
       setSending(true);
 
-      // Call the Supabase Edge Function for emergency notifications
-      const { data, error } = await supabase.functions.invoke(
-        "supabase-functions-scheduled-dismissal-notifications",
-        {
-          body: {
-            isEmergency: true,
-            emergencyMessage: message,
-          },
-        },
-      );
+      // Fetch all students with parent emails
+      const { data: students, error: studentsError } = await supabase
+        .from("students")
+        .select("parent_email, full_name")
+        .not("parent_email", "is", null);
 
-      if (error) {
-        console.error("Edge function error:", error);
-        throw new Error(
-          error.message || "Failed to send emergency notification",
-        );
-      }
+      if (studentsError) throw studentsError;
 
-      if (data?.success) {
-        toast({
-          title: "Success",
-          description: `Emergency notification sent to ${data.emailsSent} parents via email (${data.emailErrors} errors)`,
-        });
-
-        setMessage("");
-        
-        // Immediately refresh the notifications table
-        await fetchAllData(true);
-      } else {
+      if (!students || students.length === 0) {
         toast({
           title: "Warning",
-          description: data?.message || "No notifications sent",
+          description: "No parent emails found in the system",
           variant: "destructive",
         });
+        setSending(false);
+        return;
       }
+
+      // Import emailjs
+      const emailjs = (await import("@emailjs/browser")).default;
+
+      // Initialize EmailJS with your public key
+      emailjs.init(import.meta.env.VITE_EMAILJS_PUBLIC_KEY);
+
+      let emailsSent = 0;
+      let emailErrors = 0;
+
+      // Send emails to all parents
+      for (const student of students) {
+        try {
+          await emailjs.send(
+            import.meta.env.VITE_EMAILJS_SERVICE_ID,
+            import.meta.env.VITE_EMAILJS_TEMPLATE_ID,
+            {
+              title: "EMERGENCY ALERT - STI College Munoz-EDSA",
+              to_email: student.parent_email,
+              student_name: student.full_name,
+              message: message,
+              from_name: "STI College Munoz-EDSA Administration",
+            }
+          );
+          emailsSent++;
+        } catch (error) {
+          console.error(`Failed to send email to ${student.parent_email}:`, error);
+          emailErrors++;
+        }
+      }
+
+      // Record the notification in the database
+      const { error: insertError } = await supabase
+        .from("emergency_notifications")
+        .insert({
+          message: message,
+          recipient_count: emailsSent,
+        });
+
+      if (insertError) {
+        console.error("Error recording notification:", insertError);
+      }
+
+      toast({
+        title: "Success",
+        description: `Emergency notification sent to ${emailsSent} parents via email${emailErrors > 0 ? ` (${emailErrors} errors)` : ""}`,
+      });
+
+      setMessage("");
+      
+      // Immediately refresh the notifications table
+      await fetchAllData(true);
     } catch (error) {
       console.error("Error sending emergency notification:", error);
       toast({
