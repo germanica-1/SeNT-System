@@ -10,15 +10,17 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
-import { Settings, User, Menu, Moon, Sun } from "lucide-react";
+import { Settings, User, Menu, Moon, Sun, Loader2 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../../../../supabase/auth";
 import { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 
 interface TopNavigationProps {
   onSearch?: (query: string) => void;
   notifications?: Array<{ id: string; title: string }>;
   onToggleMobileMenu?: () => void;
+  isSidebarCollapsed?: boolean;
 }
 
 const TopNavigation = ({
@@ -28,9 +30,12 @@ const TopNavigation = ({
     { id: "2", title: "Meeting reminder" },
   ],
   onToggleMobileMenu = () => {},
+  isSidebarCollapsed = false,
 }: TopNavigationProps) => {
   const { user, userProfile, signOut } = useAuth();
   const [isDarkMode, setIsDarkMode] = useState(false);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const [isTransitioning, setIsTransitioning] = useState(false);
 
   // Show default user info if no user is authenticated
   const displayUser = user || { email: "admin@schoolattend.com" };
@@ -71,7 +76,11 @@ const TopNavigation = ({
   };
 
   return (
-    <div className="w-full h-16 flex items-center px-4 sm:px-6 lg:pl-[296px] fixed top-0 left-0 right-0 z-50 bg-white/80 dark:bg-gray-900/60 backdrop-blur-md border-b border-gray-200 dark:border-gray-700/50">
+    <div className={`w-full max-w-full h-16 flex items-center px-4 sm:px-6 fixed top-0 z-50 bg-white/80 dark:bg-gray-900/60 backdrop-blur-md border-b border-gray-200 dark:border-gray-700/50 transition-all duration-500 ${
+      isSidebarCollapsed ? 'left-0' : 'left-0 lg:left-[280px]'
+    } ${
+      isTransitioning ? 'opacity-0 scale-95' : 'opacity-100 scale-100'
+    }`}>
       <div className="flex items-center gap-4">
         {/* Mobile hamburger menu button */}
         <Button
@@ -83,7 +92,7 @@ const TopNavigation = ({
           <Menu className="h-5 w-5" />
         </Button>
 
-        {/* Logo/Title for mobile */}
+        {/* Logo/Title for mobile and when sidebar is collapsed */}
         <div className="lg:hidden flex items-center gap-3">
           <img
             src="/logo.png"
@@ -94,6 +103,33 @@ const TopNavigation = ({
             School Admin
           </h1>
         </div>
+
+        {/* Logo/Title for desktop when sidebar is collapsed */}
+        <AnimatePresence>
+          {isSidebarCollapsed && (
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
+              className="hidden lg:flex items-center gap-3"
+            >
+              <img
+                src="/logo.png"
+                alt="School Logo"
+                className="h-12 w-12 object-contain rounded-lg"
+              />
+              <div>
+                <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+                  School Management
+                </h2>
+                <p className="text-xs text-gray-500 dark:text-gray-400">
+                  Attendance System
+                </p>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
 
       {/* Dark Mode Toggle and Profile Avatar */}
@@ -135,8 +171,15 @@ const TopNavigation = ({
             <DropdownMenuSeparator />
             <DropdownMenuItem
               className="cursor-pointer"
+              disabled={isLoggingOut}
               onSelect={async () => {
                 try {
+                  setIsLoggingOut(true);
+                  setIsTransitioning(true);
+                  
+                  // Wait for transition animation
+                  await new Promise(resolve => setTimeout(resolve, 400));
+                  
                   await signOut();
                 } catch (error) {
                   console.error("Logout error:", error);
@@ -145,7 +188,14 @@ const TopNavigation = ({
                 }
               }}
             >
-              Log out
+              {isLoggingOut ? (
+                <span className="flex items-center gap-2">
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  <span className="animate-pulse">Logging out...</span>
+                </span>
+              ) : (
+                'Log out'
+              )}
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

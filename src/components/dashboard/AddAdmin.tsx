@@ -48,6 +48,7 @@ import type { RealtimePostgresChangesPayload } from "@supabase/supabase-js";
 
 interface AddAdminProps {
   isVisible?: boolean;
+  isSidebarCollapsed?: boolean;
 }
 
 interface Admin {
@@ -57,7 +58,7 @@ interface Admin {
   created_at: string;
 }
 
-const AddAdmin = ({ isVisible = true }: AddAdminProps) => {
+const AddAdmin = ({ isVisible = true, isSidebarCollapsed = false }: AddAdminProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isPasswordResetOpen, setIsPasswordResetOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -422,9 +423,11 @@ const AddAdmin = ({ isVisible = true }: AddAdminProps) => {
   if (!isVisible) return null;
 
   return (
-    <div className="space-y-6">
+    <div className={`space-y-6 transition-all duration-300 ease-in-out ${
+      isSidebarCollapsed ? 'w-full' : 'w-full'
+    }`}>
       {/* Add Admin Card */}
-      <div className="bg-white dark:bg-gray-800/50 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700/50 p-4 sm:p-6">
+      <div className="bg-white dark:bg-gray-800/50 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700/50 p-4 sm:p-6 transition-all duration-300">
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6 gap-4">
           <div>
             <h2 className="text-xl sm:text-2xl font-semibold text-gray-900 dark:text-gray-100">
@@ -648,111 +651,112 @@ const AddAdmin = ({ isVisible = true }: AddAdminProps) => {
         </div>
 
         {/* Admin Table */}
-        <div className="border rounded-lg overflow-x-auto">
-          <Table className="min-w-full">
-            <TableHeader>
-              <TableRow>
-                <TableHead>Admin</TableHead>
-                <TableHead>Email</TableHead>
-                <TableHead>Role</TableHead>
-                <TableHead>Created</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {isLoadingAdmins ? (
+        <div className="border rounded-lg overflow-hidden">
+          <div className="overflow-x-auto">
+            <Table className="min-w-full">
+              <TableHeader>
                 <TableRow>
-                  <TableCell colSpan={6} className="text-center py-8">
-                    Loading admin accounts...
-                  </TableCell>
+                  <TableHead className="w-[25%] min-w-[160px]">Admin</TableHead>
+                  <TableHead className="w-[25%] min-w-[180px]">Email</TableHead>
+                  <TableHead className="w-[15%] min-w-[100px]">Role</TableHead>
+                  <TableHead className="w-[15%] min-w-[100px]">Created</TableHead>
+                  <TableHead className="w-[10%] min-w-[80px]">Status</TableHead>
+                  <TableHead className="w-[10%] min-w-[100px]">Actions</TableHead>
                 </TableRow>
-              ) : admins.length === 0 ? (
-                <TableRow>
-                  <TableCell
-                    colSpan={6}
-                    className="text-center py-8 text-gray-500"
-                  >
-                    No admin accounts found
-                  </TableCell>
-                </TableRow>
-              ) : (
-                admins.map((admin) => (
-                  <TableRow key={admin.id}>
-                    <TableCell>
-                      <div className="flex items-center gap-3">
-                        <div className="h-10 w-10 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
-                          <Shield className="h-5 w-5 text-blue-600 dark:text-blue-400" />
-                        </div>
-                        <div className="font-medium">
-                          {admin.full_name || "N/A"}
-                        </div>
-                      </div>
+              </TableHeader>
+              <TableBody>
+                {isLoadingAdmins ? (
+                  <TableRow>
+                    <TableCell colSpan={6} className="text-center py-8">
+                      Loading admin accounts...
                     </TableCell>
-                    <TableCell>
-                      <div className="text-sm">{admin.email}</div>
+                  </TableRow>
+                ) : admins.length === 0 ? (
+                  <TableRow>
+                    <TableCell
+                      colSpan={6}
+                      className="text-center py-8 text-gray-500"
+                    >
+                      No admin accounts found
                     </TableCell>
-                    <TableCell>
-                      <div>
-                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300">
-                          Super Admin
+                  </TableRow>
+                ) : (
+                  admins.map((admin) => (
+                    <TableRow key={admin.id}>
+                      <TableCell>
+                        <div className="flex items-center gap-3">
+                          <div className="h-10 w-10 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center flex-shrink-0">
+                            <Shield className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                          </div>
+                          <div className="font-medium min-w-0 truncate">
+                            {admin.full_name || "N/A"}
+                          </div>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="text-sm truncate">{admin.email}</div>
+                      </TableCell>
+                      <TableCell>
+                        <div>
+                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300 whitespace-nowrap">
+                            Super Admin
+                          </span>
+                        </div>
+                      </TableCell>
+                      <TableCell className="whitespace-nowrap">
+                        {new Date(admin.created_at).toLocaleDateString("en-US", {
+                          year: "numeric",
+                          month: "short",
+                          day: "numeric",
+                        })}
+                      </TableCell>
+                      <TableCell>
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300 whitespace-nowrap">
+                          Active
                         </span>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      {new Date(admin.created_at).toLocaleDateString("en-US", {
-                        year: "numeric",
-                        month: "short",
-                        day: "numeric",
-                      })}
-                    </TableCell>
-                    <TableCell>
-                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300">
-                        Active
-                      </span>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-2">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handlePasswordReset(admin)}
-                          className="h-8 w-8 p-0 hover:bg-yellow-100 dark:hover:bg-yellow-900/30"
-                          title="Reset Password"
-                        >
-                          <Key className="h-4 w-4 text-yellow-600 dark:text-yellow-400" />
-                        </Button>
-                        <AlertDialog>
-                          <AlertDialogTrigger asChild>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className="h-8 w-8 p-0 hover:bg-red-100 dark:hover:bg-red-900/30"
-                              title="Delete Admin"
-                            >
-                              <Trash2 className="h-4 w-4 text-red-600 dark:text-red-400" />
-                            </Button>
-                          </AlertDialogTrigger>
-                          <AlertDialogContent>
-                            <AlertDialogHeader>
-                              <AlertDialogTitle>
-                                Delete Admin Account
-                              </AlertDialogTitle>
-                              <AlertDialogDescription>
-                                Are you sure you want to delete the admin
-                                account for{" "}
-                                <strong>
-                                  {admin.full_name || admin.email}
-                                </strong>
-                                ? This action cannot be undone.
-                              </AlertDialogDescription>
-                            </AlertDialogHeader>
-                            <AlertDialogFooter>
-                              <AlertDialogCancel>Cancel</AlertDialogCancel>
-                              <AlertDialogAction
-                                onClick={() =>
-                                  handleDeleteAdmin(
-                                    admin.id,
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-2">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handlePasswordReset(admin)}
+                            className="h-8 w-8 p-0 hover:bg-yellow-100 dark:hover:bg-yellow-900/30"
+                            title="Reset Password"
+                          >
+                            <Key className="h-4 w-4 text-yellow-600 dark:text-yellow-400" />
+                          </Button>
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="h-8 w-8 p-0 hover:bg-red-100 dark:hover:bg-red-900/30"
+                                title="Delete Admin"
+                              >
+                                <Trash2 className="h-4 w-4 text-red-600 dark:text-red-400" />
+                              </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>
+                                  Delete Admin Account
+                                </AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  Are you sure you want to delete the admin
+                                  account for{" "}
+                                  <strong>
+                                    {admin.full_name || admin.email}
+                                  </strong>
+                                  ? This action cannot be undone.
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                <AlertDialogAction
+                                  onClick={() =>
+                                    handleDeleteAdmin(
+                                      admin.id,
                                     admin.full_name || admin.email,
                                   )
                                 }
@@ -874,6 +878,7 @@ const AddAdmin = ({ isVisible = true }: AddAdminProps) => {
           </form>
         </DialogContent>
       </Dialog>
+    </div>
     </div>
   );
 };

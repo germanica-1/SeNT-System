@@ -4,12 +4,15 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useNavigate } from "react-router-dom";
+import { Loader2 } from "lucide-react";
 
 export default function LoginForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [currentBanner, setCurrentBanner] = useState(0);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isTransitioning, setIsTransitioning] = useState(false);
   const { signIn } = useAuth();
   const navigate = useNavigate();
 
@@ -32,18 +35,28 @@ export default function LoginForm() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(""); // Clear previous errors
+    setIsLoading(true);
 
     if (!email.trim() || !password) {
       setError("Please enter both email and password");
+      setIsLoading(false);
       return;
     }
 
     try {
       await signIn(email.trim(), password);
-      navigate("/dashboard");
+      
+      // Start transition animation
+      setIsTransitioning(true);
+      
+      // Navigate after animation
+      setTimeout(() => {
+        navigate("/dashboard");
+      }, 600);
     } catch (error: any) {
       console.error("Login error:", error);
       setError(error.message || "Login failed. Please try again.");
+      setIsLoading(false);
     }
   };
 
@@ -69,7 +82,9 @@ export default function LoginForm() {
         ))}
       </div>
 
-      <div className="bg-white/95 backdrop-blur-md border border-gray-200/50 rounded-2xl shadow-xl p-8 w-full max-w-md relative z-10">
+      <div className={`bg-white/95 backdrop-blur-md border border-gray-200/50 rounded-2xl shadow-xl p-8 w-full max-w-md relative z-10 transition-all duration-500 ${
+        isTransitioning ? 'opacity-0 scale-95 translate-y-4' : 'opacity-100 scale-100 translate-y-0'
+      }`}>
         <div className="text-center mb-8">
           <div className="flex justify-center mb-4">
             <img
@@ -131,9 +146,19 @@ export default function LoginForm() {
 
           <Button
             type="submit"
-            className="w-full h-12 rounded-lg bg-blue-600 text-white hover:bg-blue-700 text-sm font-medium transition-colors shadow-sm"
+            disabled={isLoading}
+            className={`w-full h-12 rounded-lg bg-blue-600 text-white hover:bg-blue-700 text-sm font-medium transition-all shadow-sm relative overflow-hidden ${
+              isLoading ? 'bg-blue-700' : ''
+            }`}
           >
-            Sign in to Dashboard
+            {isLoading ? (
+              <span className="flex items-center justify-center gap-2">
+                <Loader2 className="h-5 w-5 animate-spin" />
+                <span className="animate-pulse">Signing in...</span>
+              </span>
+            ) : (
+              'Sign in to Dashboard'
+            )}
           </Button>
         </form>
       </div>

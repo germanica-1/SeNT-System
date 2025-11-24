@@ -1,4 +1,5 @@
 import React, { useState, useEffect, Suspense, lazy, useMemo } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import TopNavigation from "../dashboard/layout/TopNavigation";
 import Sidebar from "../dashboard/layout/Sidebar";
 import DashboardGrid from "../dashboard/DashboardGrid";
@@ -17,6 +18,7 @@ const AddAdmin = lazy(() => import("../dashboard/AddAdmin"));
 const Home = () => {
   const [activeView, setActiveView] = useState("Attendance Logs");
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [loadedComponents, setLoadedComponents] = useState<Set<string>>(
     new Set(),
   );
@@ -37,6 +39,7 @@ const Home = () => {
   const renderActiveComponent = useMemo(() => {
     const componentProps = {
       isVisible: true,
+      isSidebarCollapsed,
     };
 
     switch (activeView) {
@@ -54,21 +57,57 @@ const Home = () => {
     }
   }, [activeView]);
 
+  // Animation variants for page transitions
+  const pageVariants = {
+    initial: {
+      opacity: 0,
+      y: 20,
+      scale: 0.98,
+    },
+    animate: {
+      opacity: 1,
+      y: 0,
+      scale: 1,
+      transition: {
+        duration: 0.4,
+        ease: [0.4, 0, 0.2, 1],
+      },
+    },
+    exit: {
+      opacity: 0,
+      y: -20,
+      scale: 0.98,
+      transition: {
+        duration: 0.3,
+        ease: [0.4, 0, 0.2, 1],
+      },
+    },
+  };
+
   return (
     <div className="min-h-screen bg-[#f5f5f7] dark:bg-gray-950">
-      <TopNavigation onToggleMobileMenu={toggleMobileMenu} />
+      <TopNavigation 
+        onToggleMobileMenu={toggleMobileMenu}
+        isSidebarCollapsed={isSidebarCollapsed}
+      />
       <div className="flex h-screen">
         <Sidebar
           activeItem={activeView}
           onItemClick={handleSidebarItemClick}
           isMobileMenuOpen={isMobileMenuOpen}
           onCloseMobileMenu={() => setIsMobileMenuOpen(false)}
+          onCollapsedChange={setIsSidebarCollapsed}
         />
-        <main className="flex-1 overflow-auto lg:ml-[280px] pt-16">
+        <motion.main
+          className={`flex-1 overflow-auto pt-16 w-full max-w-full transition-all duration-300 ${
+            isSidebarCollapsed ? 'lg:ml-0' : 'lg:ml-[280px]'
+          }`}
+        >
           <div
             className={cn(
-              "container mx-auto p-4 sm:p-6 space-y-6 sm:space-y-8",
+              "w-full max-w-full p-4 sm:p-6 space-y-6 sm:space-y-8",
               "transition-all duration-300 ease-in-out",
+              isSidebarCollapsed ? "mx-auto max-w-7xl" : ""
             )}
           >
             <Suspense
@@ -78,18 +117,34 @@ const Home = () => {
                 </div>
               }
             >
-              {renderActiveComponent}
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={activeView}
+                  variants={pageVariants}
+                  initial="initial"
+                  animate="animate"
+                  exit="exit"
+                >
+                  {renderActiveComponent}
+                </motion.div>
+              </AnimatePresence>
             </Suspense>
           </div>
-        </main>
+        </motion.main>
       </div>
       {/* Mobile menu overlay */}
-      {isMobileMenuOpen && (
-        <div
-          className="fixed inset-0 bg-black dark:bg-black bg-opacity-50 dark:bg-opacity-60 z-40 lg:hidden"
-          onClick={() => setIsMobileMenuOpen(false)}
-        />
-      )}
+      <AnimatePresence>
+        {isMobileMenuOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="fixed inset-0 bg-black dark:bg-black bg-opacity-50 dark:bg-opacity-60 z-40 lg:hidden"
+            onClick={() => setIsMobileMenuOpen(false)}
+          />
+        )}
+      </AnimatePresence>
     </div>
   );
 };

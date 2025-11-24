@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -47,9 +48,10 @@ interface AttendanceLog {
 
 interface AttendanceLogsProps {
   isVisible?: boolean;
+  isSidebarCollapsed?: boolean;
 }
 
-const AttendanceLogs = ({ isVisible = true }: AttendanceLogsProps) => {
+const AttendanceLogs = ({ isVisible = true, isSidebarCollapsed = false }: AttendanceLogsProps) => {
   const [attendanceLogs, setAttendanceLogs] = useState<AttendanceLog[]>([]);
   const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
@@ -406,74 +408,94 @@ const AttendanceLogs = ({ isVisible = true }: AttendanceLogsProps) => {
       </div>
 
       {/* Attendance Table */}
-      <div className="border rounded-lg overflow-x-auto">
-        <Table className="min-w-full">
-          <TableHeader>
-            <TableRow>
-              <TableHead>Student Name</TableHead>
-              <TableHead>Grade & Section</TableHead>
-              <TableHead>Date</TableHead>
-              <TableHead>Time</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {loading ? (
+      <motion.div
+        initial={{ opacity: 0, height: 0 }}
+        animate={{ opacity: 1, height: "auto" }}
+        transition={{ duration: 0.4, ease: [0.4, 0, 0.2, 1] }}
+        className="border rounded-lg overflow-hidden"
+      >
+        <div className="overflow-x-auto">
+          <Table className="min-w-full">
+            <TableHeader>
               <TableRow>
-                <TableCell colSpan={4} className="text-center py-8">
-                  <div className="flex items-center justify-center">
-                    <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500"></div>
-                    <span className="ml-2">Loading attendance logs...</span>
-                  </div>
-                </TableCell>
+                <TableHead className="min-w-[200px]">Student Name</TableHead>
+                <TableHead className="min-w-[150px]">Grade & Section</TableHead>
+                <TableHead className="min-w-[120px]">Date</TableHead>
+                <TableHead className="min-w-[100px]">Time</TableHead>
               </TableRow>
-            ) : filteredLogs.length === 0 ? (
-              <TableRow>
-                <TableCell
-                  colSpan={4}
-                  className="text-center py-8 text-gray-500"
-                >
-                  No attendance records found
-                </TableCell>
-              </TableRow>
-            ) : (
-              filteredLogs.map((log) => (
-                <TableRow key={log.id}>
-                  <TableCell>
-                    <div className="flex items-center gap-3">
-                      <Avatar className="h-10 w-10">
-                        <AvatarFallback>
-                          {log.full_name
-                            .split(" ")
-                            .map((n) => n[0])
-                            .join("")}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div className="font-medium">{log.full_name}</div>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <div>
-                      <Badge variant="outline">{log.grade_level}</Badge>
-                      <div className="text-sm text-gray-500 dark:text-gray-300 mt-1">
-                        Section {log.section}
-                      </div>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    {format(new Date(log.date), "MMM dd, yyyy")}
-                  </TableCell>
-                  <TableCell>
-                    <div className="text-sm">
-                      <Clock className="inline h-3 w-3 mr-1" />
-                      {log.time}
+            </TableHeader>
+            <TableBody>
+              {loading ? (
+                <TableRow>
+                  <TableCell colSpan={4} className="text-center py-8">
+                    <div className="flex items-center justify-center">
+                      <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500"></div>
+                      <span className="ml-2">Loading attendance logs...</span>
                     </div>
                   </TableCell>
                 </TableRow>
-              ))
-            )}
-          </TableBody>
-        </Table>
-      </div>
+              ) : filteredLogs.length === 0 ? (
+                <TableRow>
+                  <TableCell
+                    colSpan={4}
+                    className="text-center py-8 text-gray-500"
+                  >
+                    No attendance records found
+                  </TableCell>
+                </TableRow>
+              ) : (
+                <AnimatePresence mode="popLayout">
+                  {filteredLogs.map((log, index) => (
+                    <motion.tr
+                      key={log.id}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, x: -20 }}
+                      transition={{
+                        duration: 0.3,
+                        delay: index * 0.03,
+                        ease: [0.4, 0, 0.2, 1],
+                      }}
+                      className="border-b hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors"
+                    >
+                      <TableCell>
+                        <div className="flex items-center gap-3">
+                          <Avatar className="h-10 w-10 flex-shrink-0">
+                            <AvatarFallback>
+                              {log.full_name
+                                .split(" ")
+                                .map((n) => n[0])
+                                .join("")}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div className="font-medium min-w-0 truncate">{log.full_name}</div>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div>
+                          <Badge variant="outline">{log.grade_level}</Badge>
+                          <div className="text-sm text-gray-500 dark:text-gray-300 mt-1">
+                            Section {log.section}
+                          </div>
+                        </div>
+                      </TableCell>
+                      <TableCell className="whitespace-nowrap">
+                        {format(new Date(log.date), "MMM dd, yyyy")}
+                      </TableCell>
+                      <TableCell>
+                        <div className="text-sm whitespace-nowrap">
+                          <Clock className="inline h-3 w-3 mr-1" />
+                          {log.time}
+                        </div>
+                      </TableCell>
+                    </motion.tr>
+                  ))}
+                </AnimatePresence>
+              )}
+            </TableBody>
+          </Table>
+        </div>
+      </motion.div>
     </div>
   );
 };

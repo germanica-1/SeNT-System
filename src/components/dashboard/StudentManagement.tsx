@@ -5,6 +5,7 @@ import React, {
   useCallback,
   useMemo,
 } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -66,6 +67,7 @@ interface Student {
 
 interface StudentManagementProps {
   isVisible?: boolean;
+  isSidebarCollapsed?: boolean;
 }
 
 // Enhanced cache with subscription management
@@ -93,7 +95,7 @@ const studentCache = {
   },
 };
 
-const StudentManagement = ({ isVisible = true }: StudentManagementProps) => {
+const StudentManagement = ({ isVisible = true, isSidebarCollapsed = false }: StudentManagementProps) => {
   const [students, setStudents] = useState<Student[]>([]);
   const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
@@ -1067,101 +1069,102 @@ const StudentManagement = ({ isVisible = true }: StudentManagementProps) => {
       </div>
 
       {/* Students Table */}
-      <div className="border rounded-lg overflow-x-auto">
-        <Table className="min-w-full">
-          <TableHeader>
-            <TableRow>
-              <TableHead>Student</TableHead>
-              <TableHead>Grade & Section</TableHead>
-              <TableHead>Parent Contact</TableHead>
-
-              <TableHead>Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {loading ? (
+      <div className="border rounded-lg overflow-hidden">
+        <div className="overflow-x-auto">
+          <Table>
+            <TableHeader>
               <TableRow>
-                <TableCell colSpan={4} className="text-center py-8">
-                  Loading students...
-                </TableCell>
+                <TableHead className="w-[35%] min-w-[200px]">Student</TableHead>
+                <TableHead className="w-[20%] min-w-[120px]">Grade & Section</TableHead>
+                <TableHead className="w-[25%] min-w-[130px]">Parent Contact</TableHead>
+                <TableHead className="w-[20%] min-w-[100px]">Actions</TableHead>
               </TableRow>
-            ) : filteredStudents.length === 0 ? (
-              <TableRow>
-                <TableCell
-                  colSpan={4}
-                  className="text-center py-8 text-gray-500"
-                >
-                  No students found
-                </TableCell>
-              </TableRow>
-            ) : (
-              filteredStudents.map((student) => (
-                <TableRow key={student.id}>
-                  <TableCell>
-                    <div className="flex items-center gap-3">
-                      <Avatar className="h-10 w-10">
-                        {student.face_image_front_url ? (
-                          <AvatarImage src={student.face_image_front_url} />
-                        ) : null}
-                        <AvatarFallback>
-                          {student.full_name
-                            .split(" ")
-                            .map((n) => n[0])
-                            .join("")}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div>
-                        <div className="font-medium">{student.full_name}</div>
-                        <div className="text-sm text-gray-500 dark:text-gray-300">
-                          {student.parent_email}
-                        </div>
-                        <div className="text-xs text-blue-600 dark:text-blue-400">
-                          {[
-                            student.face_embedding_front && "Front",
-                            student.face_embedding_low_angle && "Low-angle",
-                            student.face_embedding_left && "Left",
-                            student.face_embedding_right && "Right",
-                          ]
-                            .filter(Boolean)
-                            .join(", ") || "No embeddings"}{" "}
-                          face data
-                        </div>
-                      </div>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <div>
-                      <Badge variant="outline">{student.grade_level}</Badge>
-                      <div className="text-sm text-gray-500 dark:text-gray-300 mt-1">
-                        Section {student.section}
-                      </div>
-                    </div>
-                  </TableCell>
-                  <TableCell>{student.parent_contact}</TableCell>
-
-                  <TableCell>
-                    <div className="flex gap-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleEdit(student)}
-                      >
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleDelete(student.id)}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
+            </TableHeader>
+            <TableBody>
+              {loading ? (
+                <TableRow>
+                  <TableCell colSpan={4} className="text-center py-8">
+                    Loading students...
                   </TableCell>
                 </TableRow>
-              ))
-            )}
-          </TableBody>
-        </Table>
+              ) : filteredStudents.length === 0 ? (
+                <TableRow>
+                  <TableCell
+                    colSpan={4}
+                    className="text-center py-8 text-gray-500"
+                  >
+                    No students found
+                  </TableCell>
+                </TableRow>
+              ) : (
+                filteredStudents.map((student) => (
+                  <TableRow key={student.id}>
+                    <TableCell>
+                      <div className="flex items-center gap-3">
+                        <Avatar className="h-10 w-10 flex-shrink-0">
+                          {student.face_image_front_url ? (
+                            <AvatarImage src={student.face_image_front_url} />
+                          ) : null}
+                          <AvatarFallback>
+                            {student.full_name
+                              .split(" ")
+                              .map((n) => n[0])
+                              .join("")}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div className="min-w-0">
+                          <div className="font-medium truncate">{student.full_name}</div>
+                          <div className="text-sm text-gray-500 dark:text-gray-300 truncate">
+                            {student.parent_email}
+                          </div>
+                          <div className="text-xs text-blue-600 dark:text-blue-400 truncate">
+                            {[
+                              student.face_embedding_front && "Front",
+                              student.face_embedding_low_angle && "Low-angle",
+                              student.face_embedding_left && "Left",
+                              student.face_embedding_right && "Right",
+                            ]
+                              .filter(Boolean)
+                              .join(", ") || "No embeddings"}{" "}
+                            face data
+                          </div>
+                        </div>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div>
+                        <Badge variant="outline">{student.grade_level}</Badge>
+                        <div className="text-sm text-gray-500 dark:text-gray-300 mt-1">
+                          Section {student.section}
+                        </div>
+                      </div>
+                    </TableCell>
+                    <TableCell className="whitespace-nowrap">{student.parent_contact}</TableCell>
+
+                    <TableCell>
+                      <div className="flex gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleEdit(student)}
+                        >
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleDelete(student.id)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
+            </TableBody>
+          </Table>
+        </div>
       </div>
     </div>
   );
