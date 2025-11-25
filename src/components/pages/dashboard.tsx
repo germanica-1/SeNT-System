@@ -90,7 +90,7 @@ const Home = () => {
         onToggleMobileMenu={toggleMobileMenu}
         isSidebarCollapsed={isSidebarCollapsed}
       />
-      <div className="flex h-screen">
+      <div className="flex min-h-screen">
         <Sidebar
           activeItem={activeView}
           onItemClick={handleSidebarItemClick}
@@ -99,7 +99,7 @@ const Home = () => {
           onCollapsedChange={setIsSidebarCollapsed}
         />
         <motion.main
-          className={`flex-1 overflow-auto pt-16 transition-all duration-500 ease-in-out ${
+          className={`flex-1 overflow-auto pt-16 pb-8 transition-all duration-500 ease-in-out ${
             isSidebarCollapsed ? 'lg:ml-0' : 'lg:ml-[280px]'
           }`}
         >
