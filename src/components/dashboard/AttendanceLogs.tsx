@@ -468,13 +468,13 @@ const AttendanceLogs = ({ isVisible = true, isSidebarCollapsed = false }: Attend
                                 .join("")}
                             </AvatarFallback>
                           </Avatar>
-                          <div className="font-medium min-w-0 truncate">{log.full_name}</div>
+                          <div className="font-medium min-w-0 truncate text-base">{log.full_name}</div>
                         </div>
                       </TableCell>
                       <TableCell>
                         <div>
                           <Badge variant="outline">{log.grade_level}</Badge>
-                          <div className="text-sm text-gray-500 dark:text-gray-300 mt-1">
+                          <div className="text-base text-gray-500 dark:text-gray-300 mt-1">
                             Section {log.section}
                           </div>
                         </div>
@@ -483,7 +483,7 @@ const AttendanceLogs = ({ isVisible = true, isSidebarCollapsed = false }: Attend
                         {format(new Date(log.date), "MMM dd, yyyy")}
                       </TableCell>
                       <TableCell>
-                        <div className="text-sm whitespace-nowrap">
+                        <div className="text-base whitespace-nowrap">
                           <Clock className="inline h-3 w-3 mr-1" />
                           {log.time}
                         </div>

@@ -1113,11 +1113,11 @@ const StudentManagement = ({ isVisible = true, isSidebarCollapsed = false }: Stu
                           </AvatarFallback>
                         </Avatar>
                         <div className="min-w-0">
-                          <div className="font-medium truncate">{student.full_name}</div>
-                          <div className="text-sm text-gray-500 dark:text-gray-300 truncate">
+                          <div className="font-medium truncate text-base">{student.full_name}</div>
+                          <div className="text-base text-gray-500 dark:text-gray-300 truncate">
                             {student.parent_email}
                           </div>
-                          <div className="text-xs text-blue-600 dark:text-blue-400 truncate">
+                          <div className="text-sm text-blue-600 dark:text-blue-400 truncate">
                             {[
                               student.face_embedding_front && "Front",
                               student.face_embedding_low_angle && "Low-angle",
@@ -1134,7 +1134,7 @@ const StudentManagement = ({ isVisible = true, isSidebarCollapsed = false }: Stu
                     <TableCell>
                       <div>
                         <Badge variant="outline">{student.grade_level}</Badge>
-                        <div className="text-sm text-gray-500 dark:text-gray-300 mt-1">
+                        <div className="text-base text-gray-500 dark:text-gray-300 mt-1">
                           Section {student.section}
                         </div>
                       </div>
@@ -1142,10 +1142,11 @@ const StudentManagement = ({ isVisible = true, isSidebarCollapsed = false }: Stu
                     <TableCell className="whitespace-nowrap">{student.parent_contact}</TableCell>
 
                     <TableCell>
-                      <div className="flex gap-2">
+                      <div className="flex flex-col sm:flex-row gap-2">
                         <Button
                           variant="outline"
                           size="sm"
+                          className="w-10 sm:w-auto"
                           onClick={() => handleEdit(student)}
                         >
                           <Edit className="h-4 w-4" />
@@ -1153,6 +1154,7 @@ const StudentManagement = ({ isVisible = true, isSidebarCollapsed = false }: Stu
                         <Button
                           variant="outline"
                           size="sm"
+                          className="w-10 sm:w-auto"
                           onClick={() => handleDelete(student.id)}
                         >
                           <Trash2 className="h-4 w-4" />

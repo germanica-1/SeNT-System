@@ -15,6 +15,12 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import {
   AlertTriangle,
   Send,
   History,
@@ -163,18 +169,18 @@ const EmergencyNotification = ({
                   console.log("Emergency subscription status:", status);
                 });
             }
-          } catch (error) {
+          } catch (error: unknown) {
             console.error("Error fetching emergency data:", error);
             toast({
               title: "Error",
-              description: "Failed to fetch emergency notification data",
+              description: error instanceof Error ? error.message : "Failed to fetch emergency notification data",
               variant: "destructive",
             });
           } finally {
             setLoading(false);
           }
         }, 0);
-      } catch (error) {
+      } catch (error: unknown) {
         console.error("Error in fetchAllData:", error);
         setLoading(false);
       }
@@ -302,11 +308,11 @@ const EmergencyNotification = ({
       
       // Immediately refresh the notifications table
       await fetchAllData(true);
-    } catch (error) {
+    } catch (error: unknown) {
       console.error("Error sending emergency notification:", error);
       toast({
         title: "Error",
-        description: `Failed to send emergency notification: ${error.message}`,
+        description: `Failed to send emergency notification: ${error instanceof Error ? error.message : "Unknown error"}`,
         variant: "destructive",
       });
     } finally {
@@ -315,11 +321,13 @@ const EmergencyNotification = ({
   };
 
   const predefinedMessages = [
-    "Emergency evacuation in progress. Please do not come to school to pick up your child. We will notify you when it's safe.",
-    "School is under lockdown due to safety concerns. All students are secure. Updates will follow.",
-    "Due to severe weather conditions, school is closing early. Please arrange for immediate pickup.",
-    "Medical emergency on campus. School operations are temporarily suspended. Students are safe.",
-    "Power outage affecting school operations. Early dismissal at 2:00 PM today.",
+  "Emergency evacuation in progress. Please do not come to school to pick up your child. We will notify you when it's safe.",
+  "School is under lockdown due to safety concerns. All students are secure. Updates will follow.",
+  "Due to severe weather conditions, school is closing early. Please arrange for immediate pickup.",
+  "Medical emergency on campus. School operations are temporarily suspended. Students are safe.",
+  "Water supply interruption on campus. Classes are suspended until further notice.",
+  "Power outage affecting school operations. Early dismissal at 2:00 PM today.",
+
   ];
 
   if (!isVisible) return null;
@@ -420,15 +428,15 @@ const EmergencyNotification = ({
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.4, delay: 0.2, ease: [0.4, 0, 0.2, 1] }}
         >
-          <Card className="bg-white dark:bg-gray-800/80 border-gray-200 dark:border-gray-700/60">
+          <Card className="bg-white dark:bg-gray-800/80 border-gray-200 dark:border-gray-700/60 h-full flex flex-col">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <MessageSquare className="h-5 w-5" />
                 Quick Message Templates
               </CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="space-y-2">
+            <CardContent className="flex-1 flex flex-col pb-2">
+              <div className="space-y-2 flex-1">
                 {predefinedMessages.map((template, index) => (
                   <motion.div
                     key={index}
@@ -498,9 +506,20 @@ const EmergencyNotification = ({
                     <TableRow key={notification.id}>
                       <TableCell>
                         <div className="max-w-md">
-                          <p className="text-sm font-medium truncate">
-                            {notification.message}
-                          </p>
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <p className="text-base font-medium truncate cursor-help">
+                                  {notification.message}
+                                </p>
+                              </TooltipTrigger>
+                              <TooltipContent className="max-w-sm">
+                                <p className="text-base whitespace-normal">
+                                  {notification.message}
+                                </p>
+                              </TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
                         </div>
                       </TableCell>
                       <TableCell>

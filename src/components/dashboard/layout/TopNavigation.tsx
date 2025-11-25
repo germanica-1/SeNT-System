@@ -76,8 +76,8 @@ const TopNavigation = ({
   };
 
   return (
-    <div className={`w-full max-w-full h-16 flex items-center px-4 sm:px-6 fixed top-0 z-50 bg-white/80 dark:bg-gray-900/60 backdrop-blur-md border-b border-gray-200 dark:border-gray-700/50 transition-all duration-500 ${
-      isSidebarCollapsed ? 'left-0' : 'left-0 lg:left-[280px]'
+    <div className={`h-16 flex items-center px-4 sm:px-6 fixed top-0 z-50 bg-white/80 dark:bg-gray-900/60 backdrop-blur-md border-b border-gray-200 dark:border-gray-700/50 transition-all duration-500 ${
+      isSidebarCollapsed ? 'left-0 right-0' : 'left-0 lg:left-[280px] right-0'
     } ${
       isTransitioning ? 'opacity-0 scale-95' : 'opacity-100 scale-100'
     }`}>

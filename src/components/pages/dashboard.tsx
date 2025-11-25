@@ -99,15 +99,15 @@ const Home = () => {
           onCollapsedChange={setIsSidebarCollapsed}
         />
         <motion.main
-          className={`flex-1 overflow-auto pt-16 w-full max-w-full transition-all duration-300 ${
+          className={`flex-1 overflow-auto pt-16 transition-all duration-500 ease-in-out ${
             isSidebarCollapsed ? 'lg:ml-0' : 'lg:ml-[280px]'
           }`}
         >
           <div
             className={cn(
-              "w-full max-w-full p-4 sm:p-6 space-y-6 sm:space-y-8",
-              "transition-all duration-300 ease-in-out",
-              isSidebarCollapsed ? "mx-auto max-w-7xl" : ""
+              "w-full p-4 sm:p-6 space-y-6 sm:space-y-8",
+              "transition-all duration-500 ease-in-out",
+              isSidebarCollapsed ? "max-w-full px-8" : "max-w-full px-4"
             )}
           >
             <Suspense
