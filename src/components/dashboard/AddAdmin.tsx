@@ -661,7 +661,7 @@ const AddAdmin = ({ isVisible = true, isSidebarCollapsed = false }: AddAdminProp
                   <TableHead className="w-[15%] min-w-[100px]">Role</TableHead>
                   <TableHead className="w-[15%] min-w-[100px]">Created</TableHead>
                   <TableHead className="w-[10%] min-w-[80px]">Status</TableHead>
-                  <TableHead className="w-[10%] min-w-[100px]">Actions</TableHead>
+                  <TableHead className="w-[10%] min-w-[100px] text-center">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -715,8 +715,8 @@ const AddAdmin = ({ isVisible = true, isSidebarCollapsed = false }: AddAdminProp
                           Active
                         </span>
                       </TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-2">
+                      <TableCell className="text-center">
+                        <div className="flex flex-col sm:flex-row items-center justify-center gap-2">
                           <Button
                             variant="ghost"
                             size="sm"
