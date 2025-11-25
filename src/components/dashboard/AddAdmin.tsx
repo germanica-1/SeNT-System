@@ -423,7 +423,7 @@ const AddAdmin = ({ isVisible = true, isSidebarCollapsed = false }: AddAdminProp
   if (!isVisible) return null;
 
   return (
-    <div className={`space-y-6 transition-all duration-300 ease-in-out overflow-y-auto max-h-screen pb-6 ${
+    <div className={`space-y-6 transition-all duration-300 ease-in-out ${
       isSidebarCollapsed ? 'w-full' : 'w-full'
     }`}>
       {/* Add Admin Card */}
