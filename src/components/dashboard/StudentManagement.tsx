@@ -379,6 +379,107 @@ const StudentManagement = ({ isVisible = true, isSidebarCollapsed = false }: Stu
     });
   };
 
+  // Image quality detection using Laplacian variance (blur detection)
+  const checkImageQuality = (file: File): Promise<{ isQualityOk: boolean; score: number; message: string }> => {
+    return new Promise((resolve) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement("canvas");
+        const ctx = canvas.getContext("2d");
+        
+        if (!ctx) {
+          resolve({ isQualityOk: false, score: 0, message: "Failed to analyze image quality." });
+          return;
+        }
+
+        // Resize for faster processing (max 500px)
+        const maxSize = 500;
+        const scale = Math.min(maxSize / img.width, maxSize / img.height, 1);
+        canvas.width = img.width * scale;
+        canvas.height = img.height * scale;
+        
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        
+        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        const data = imageData.data;
+        
+        // Convert to grayscale and calculate Laplacian variance
+        const width = canvas.width;
+        const height = canvas.height;
+        const gray: number[] = [];
+        
+        for (let i = 0; i < data.length; i += 4) {
+          // Grayscale conversion
+          gray.push(0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2]);
+        }
+        
+        // Apply Laplacian kernel and calculate variance
+        let sum = 0;
+        let sumSq = 0;
+        let count = 0;
+        
+        // Laplacian kernel: [0, 1, 0], [1, -4, 1], [0, 1, 0]
+        for (let y = 1; y < height - 1; y++) {
+          for (let x = 1; x < width - 1; x++) {
+            const idx = y * width + x;
+            const laplacian = 
+              gray[idx - width] +     // top
+              gray[idx - 1] +         // left
+              -4 * gray[idx] +        // center
+              gray[idx + 1] +         // right
+              gray[idx + width];      // bottom
+            
+            sum += laplacian;
+            sumSq += laplacian * laplacian;
+            count++;
+          }
+        }
+        
+        const mean = sum / count;
+        const variance = (sumSq / count) - (mean * mean);
+        
+        // Threshold for blur detection (lower variance = more blur)
+        // Typical values: < 100 = very blurry, 100-500 = somewhat blurry, > 500 = sharp
+        const blurThreshold = 100;
+        const isQualityOk = variance >= blurThreshold;
+        
+        // Also check minimum resolution
+        const minResolution = 200;
+        const hasMinResolution = img.width >= minResolution && img.height >= minResolution;
+        
+        if (!hasMinResolution) {
+          resolve({
+            isQualityOk: false,
+            score: variance,
+            message: `Image resolution too low. Minimum ${minResolution}x${minResolution} pixels required.`
+          });
+          return;
+        }
+        
+        if (!isQualityOk) {
+          resolve({
+            isQualityOk: false,
+            score: variance,
+            message: "Image appears to be blurry or low-quality. Please upload a clearer photo."
+          });
+          return;
+        }
+        
+        resolve({
+          isQualityOk: true,
+          score: variance,
+          message: "Image quality is acceptable."
+        });
+      };
+      
+      img.onerror = () => {
+        resolve({ isQualityOk: false, score: 0, message: "Failed to load image for quality check." });
+      };
+      
+      img.src = URL.createObjectURL(file);
+    });
+  };
+
   // Handle file selection
   const handleFileSelect = async (
     event: React.ChangeEvent<HTMLInputElement>,
@@ -404,6 +505,21 @@ const StudentManagement = ({ isVisible = true, isSidebarCollapsed = false }: Stu
         description: "Please select an image smaller than 10MB.",
         variant: "destructive",
       });
+      return;
+    }
+
+    // Check image quality (blur detection)
+    const qualityResult = await checkImageQuality(file);
+    if (!qualityResult.isQualityOk) {
+      toast({
+        title: "Image Quality Issue",
+        description: qualityResult.message,
+        variant: "destructive",
+      });
+      // Clear the file input
+      if (fileInputRefs[imageType].current) {
+        fileInputRefs[imageType].current.value = "";
+      }
       return;
     }
 
